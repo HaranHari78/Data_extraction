@@ -1,5 +1,3 @@
-# prompts.py
-
 def sentence_extraction_prompt(title, text):
     return f"""
     You are analyzing a clinical document for an AML cancer patient.
@@ -17,9 +15,7 @@ def sentence_extraction_prompt(title, text):
     Document Text:
     {text}
 
-    Respond with ONLY valid JSON in the following format:
-    Do not include explanations or markdown. Return only JSON.
-
+    Return a JSON like:
     {{
         "document_title": "{title}",
         "aml_diagnosis_sentences": [],
@@ -31,37 +27,14 @@ def sentence_extraction_prompt(title, text):
 
 def field_extraction_prompt(text):
     return f"""
-    Extract the following fields from this clinical note.
+    You are analyzing a clinical note for an AML cancer patient.
+
+    Extract the following fields according to the provided function schema:
+    - AML Diagnosis Date
+    - Precedent Disease with name, date, and evidence
+    - Performance Status (ECOG and KPS scores with dates and evidence)
+    - Mutational Status (NPM1, RUNX1, TP53, FLT3, ASXL1 — each with status, date, and evidence)
 
     Clinical Note:
     """{text}"""
-
-    Fields to extract:
-    1. AML Diagnosis Date – mm/dd/yyyy format
-    2. Precedent Disease — a list of objects, each with:
-        - disease name
-        - associated date
-        - evidence
-    3. Performance Status:
-        - ECOG and KPS scores with values, dates, and evidence
-    4. Mutational Status (genes: NPM1, RUNX1, TP53, FLT3, ASXL1):
-        - each with status, date, and evidence
-
-    Return ONLY valid JSON like this:
-    {{
-        "document_title": "",
-        "aml_diagnosis_date": {{"value": "", "evidence": ""}},
-        "precedent_disease": [{{"disease": "", "date": "", "evidence": ""}}],
-        "performance_status": {{
-            "kps_score": {{"value": "", "date": "", "evidence": ""}},
-            "ecog_score": {{"value": "", "date": "", "evidence": ""}}
-        }},
-        "mutational_status": {{
-            "NPM1": {{"status": "", "date": "", "evidence": ""}},
-            "RUNX1": {{"status": "", "date": "", "evidence": ""}},
-            "TP53": {{"status": "", "date": "", "evidence": ""}},
-            "FLT3": {{"status": "", "date": "", "evidence": ""}},
-            "ASXL1": {{"status": "", "date": "", "evidence": ""}}
-        }}
-    }}
     """
