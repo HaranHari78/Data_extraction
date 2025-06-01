@@ -1,0 +1,38 @@
+import httpx
+import configparser
+from openai import AzureOpenAI
+from functions import schema  # assuming functions.py defines extract_clinical_data
+
+
+def load_config():
+    """Load configuration from config.ini"""
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    return config
+
+
+def call_openai_api(prompt, model):
+    """Call Azure OpenAI API using function calling"""
+    custom_http_client = httpx.Client(verify=False)
+    config = load_config()
+
+    client = AzureOpenAI(
+        api_key=config['azure_openai']['api_key'],
+        api_version=config['azure_openai']['api_version'],
+        azure_endpoint=config['azure_openai']['endpoint'],
+        http_client=custom_http_client,
+    )
+
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}],
+            functions=[schema],
+            function_call={"name": "extract_clinical_data"}
+        )
+        arguments = response.choices[0].message.function_call.arguments.strip()
+        print("[🔁 Function Call Arguments Preview]", arguments[:150])
+        return arguments
+    except Exception as e:
+        print(f"[❌ Function Call Error] {str(e)}")
+        return None
