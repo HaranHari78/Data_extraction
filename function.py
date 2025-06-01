@@ -1,8 +1,6 @@
-# functions.py
-
 schema = {
     "name": "extract_clinical_data",
-    "description": "Extract structured cancer-related clinical information from unstructured medical text.",
+    "description": "Extract clinical data fields from an AML patient's note.",
     "parameters": {
         "type": "object",
         "properties": {
@@ -10,10 +8,9 @@ schema = {
             "aml_diagnosis_date": {
                 "type": "object",
                 "properties": {
-                    "value": {"type": "string", "description": "AML diagnosis date in mm/dd/yyyy format"},
+                    "value": {"type": "string"},
                     "evidence": {"type": "string"}
-                },
-                "required": ["value", "evidence"]
+                }
             },
             "precedent_disease": {
                 "type": "array",
@@ -23,8 +20,7 @@ schema = {
                         "disease": {"type": "string"},
                         "date": {"type": "string"},
                         "evidence": {"type": "string"}
-                    },
-                    "required": ["disease", "date", "evidence"]
+                    }
                 }
             },
             "performance_status": {
@@ -36,8 +32,7 @@ schema = {
                             "value": {"type": "string"},
                             "date": {"type": "string"},
                             "evidence": {"type": "string"}
-                        },
-                        "required": ["value", "date", "evidence"]
+                        }
                     },
                     "ecog_score": {
                         "type": "object",
@@ -45,28 +40,31 @@ schema = {
                             "value": {"type": "string"},
                             "date": {"type": "string"},
                             "evidence": {"type": "string"}
-                        },
-                        "required": ["value", "date", "evidence"]
+                        }
                     }
-                },
-                "required": ["kps_score", "ecog_score"]
+                }
             },
             "mutational_status": {
                 "type": "object",
                 "properties": {
-                    gene: {
-                        "type": "object",
-                        "properties": {
-                            "status": {"type": "string"},
-                            "date": {"type": "string"},
-                            "evidence": {"type": "string"}
-                        },
-                        "required": ["status", "date", "evidence"]
-                    } for gene in ["NPM1", "RUNX1", "TP53", "FLT3", "ASXL1"]
-                },
-                "required": ["NPM1", "RUNX1", "TP53", "FLT3", "ASXL1"]
+                    "NPM1": {"$ref": "#/definitions/mutation"},
+                    "RUNX1": {"$ref": "#/definitions/mutation"},
+                    "TP53": {"$ref": "#/definitions/mutation"},
+                    "FLT3": {"$ref": "#/definitions/mutation"},
+                    "ASXL1": {"$ref": "#/definitions/mutation"}
+                }
             }
         },
-        "required": ["document_title", "aml_diagnosis_date", "precedent_disease", "performance_status", "mutational_status"]
+        "required": ["document_title"]
+    },
+    "definitions": {
+        "mutation": {
+            "type": "object",
+            "properties": {
+                "status": {"type": "string"},
+                "date": {"type": "string"},
+                "evidence": {"type": "string"}
+            }
+        }
     }
 }
