@@ -1,28 +1,27 @@
-# extractor.py (Azure classic style with clean idx fix)
+# extractor.py (Modern SDK with AzureOpenAI)
 
+import os
 import json
 import pandas as pd
-import os
 from dotenv import load_dotenv
-import openai
-
+from openai import AzureOpenAI
 from prompts import function_calling_prompt
 from functions import schema
 
 load_dotenv()
 
-# Classic Azure OpenAI setup
-openai.api_type = "azure"
-openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
-openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
-openai.api_version = os.getenv("AZURE_OPENAI_API_VERSION")
-MODEL = os.getenv("AZURE_OPENAI_MODEL")
+client = AzureOpenAI(
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+)
 
+MODEL = os.getenv("AZURE_OPENAI_MODEL")
 OUTPUT_DIR = "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+
 def clean_response(raw: str):
-    """Try to parse JSON string"""
     if not raw:
         return None
     try:
@@ -48,14 +47,15 @@ def extract_data_from_csv(csv_path: str):
         prompt = function_calling_prompt(title, text)
 
         try:
-            response = openai.ChatCompletion.create(
-                engine=MODEL,
+            response = client.chat.completions.create(
+                model=MODEL,
                 messages=[{"role": "user", "content": prompt}],
                 functions=[schema],
                 function_call={"name": "extract_clinical_data"},
             )
 
-            arguments = response.choices[0]["message"]["function_call"]["arguments"]
+            message = response.choices[0].message
+            arguments = message.function_call.arguments
             parsed = clean_response(arguments)
 
             if parsed:
@@ -67,7 +67,6 @@ def extract_data_from_csv(csv_path: str):
             print(f"[❌ Error] Row {row_num}: {str(e)}")
             continue
 
-    # Save output
     output_path = os.path.join(OUTPUT_DIR, "structured_output.json")
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=4)
