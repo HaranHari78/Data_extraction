@@ -1,4 +1,4 @@
-# extractor.py (old-style Azure OpenAI method)
+# extractor.py (Azure classic style with clean idx fix)
 
 import json
 import pandas as pd
@@ -11,7 +11,7 @@ from functions import schema
 
 load_dotenv()
 
-# Setup classic Azure config
+# Classic Azure OpenAI setup
 openai.api_type = "azure"
 openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
 openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
@@ -38,7 +38,9 @@ def extract_data_from_csv(csv_path: str):
     for idx, row in df.iterrows():
         title = row.get("title", "")
         text = row.get("text", "")
-        print(f"\n[Processing] Row {idx + 1}: {title[:40]}...")
+        row_num = int(idx) + 1
+
+        print(f"\n[Processing] Row {row_num}: {title[:40]}...")
 
         if not text:
             continue
@@ -59,10 +61,10 @@ def extract_data_from_csv(csv_path: str):
             if parsed:
                 results.append(parsed)
             else:
-                print(f"[Warning] Invalid JSON for row {idx + 1}")
+                print(f"[⚠️ Warning] Invalid JSON for row {row_num}")
 
         except Exception as e:
-            print(f"[Error] Row {idx + 1}: {str(e)}")
+            print(f"[❌ Error] Row {row_num}: {str(e)}")
             continue
 
     # Save output
