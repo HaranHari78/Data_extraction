@@ -1,0 +1,34 @@
+import os
+from dotenv import load_dotenv
+from openai import AzureOpenAI
+import httpx
+import json
+
+from functions import schema  # same function schema you use
+
+load_dotenv()
+
+client = AzureOpenAI(
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    http_client=httpx.Client(verify=False)
+)
+
+model = os.getenv("AZURE_OPENAI_MODEL")
+
+prompt = """
+Document Title: Sample Title
+Clinical Text:
+The patient was diagnosed with AML on May 3, 2023. ECOG status was 1 on that day.
+"""
+
+response = client.chat.completions.create(
+    model=model,
+    messages=[{"role": "user", "content": prompt}],
+    functions=[schema],
+    function_call={"name": "extract_clinical_data"},
+)
+
+print("\n--- RAW Function Output ---\n")
+print(json.dumps(response.model_dump(), indent=2))
