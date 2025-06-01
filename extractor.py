@@ -1,26 +1,32 @@
+# extractor.py (using config.ini)
+
 import os
 import json
 import pandas as pd
-from dotenv import load_dotenv
+import configparser
 from openai import AzureOpenAI
-import httpx  # ✅ import httpx for SSL bypass
+import httpx
 
 from prompts import function_calling_prompt
 from functions import schema
 
-load_dotenv()
+# Load config.ini
 
-# ✅ Disable SSL certificate verification (for testing only)
-custom_http_client = httpx.Client(verify=False)
+def load_config():
+    config = configparser.ConfigParser()
+    config.read("config.ini")
+    return config
+
+config = load_config()
 
 client = AzureOpenAI(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    http_client=custom_http_client  # ✅ inject httpx client
+    api_key=config["azure_openai"]["api_key"],
+    api_version=config["azure_openai"]["api_version"],
+    azure_endpoint=config["azure_openai"]["endpoint"],
+    http_client=httpx.Client(verify=False)  # Optional SSL bypass
 )
 
-MODEL = os.getenv("AZURE_OPENAI_MODEL")
+MODEL = config["gpt_models"]["model_gpt4o"]
 OUTPUT_DIR = "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -56,8 +62,7 @@ def extract_data_from_csv(csv_path: str):
                 function_call={"name": "extract_clinical_data"},
             )
 
-            message = response.choices[0].message
-            arguments = message.function_call.arguments
+            arguments = response.choices[0].message.function_call.arguments
             parsed = clean_response(arguments)
 
             if parsed:
