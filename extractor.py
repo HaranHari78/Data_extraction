@@ -1,22 +1,16 @@
 # extractor.py
+
 import json
 import pandas as pd
 import os
 from dotenv import load_dotenv
-
 from openai import AzureOpenAI
-from openai.types.chat import (
-    ChatCompletionUserMessageParam,
-    ChatCompletionFunctionParam,
-    FunctionCall
-)
-
 from prompts import function_calling_prompt
 from functions import schema
 
 load_dotenv()
 
-# Azure OpenAI client setup
+# Initialize Azure OpenAI client
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
@@ -29,7 +23,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def clean_response(raw: str):
-    """Clean and parse JSON string"""
+    """Try to parse JSON string"""
     if not raw:
         return None
     try:
@@ -42,42 +36,38 @@ def extract_data_from_csv(csv_path: str):
     df = pd.read_csv(csv_path)
     results = []
 
-    for index, row in df.iterrows():
+    for idx, row in df.iterrows():
         title = row.get("title", "")
         text = row.get("text", "")
-        print(f"\n[Processing] Row {index + 1}: {title[:40]}...")
+        print(f"\n[Processing] Row {idx + 1}: {title[:40]}...")
 
         if not text:
             continue
 
         prompt = function_calling_prompt(title, text)
 
-        messages: list[ChatCompletionUserMessageParam] = [
-            {"role": "user", "content": prompt}
-        ]
-        functions: list[ChatCompletionFunctionParam] = [schema]
-        function_call = FunctionCall(name="extract_clinical_data")
-
         try:
             response = client.chat.completions.create(
                 model=MODEL,
-                messages=messages,
-                functions=functions,
-                function_call=function_call,
+                messages=[{"role": "user", "content": prompt}],
+                functions=[schema],
+                function_call={"name": "extract_clinical_data"},
             )
 
-            function_args = response.choices[0].message.function_call.arguments
-            parsed = clean_response(function_args)
+            message = response.choices[0].message
+            arguments = message.function_call.arguments
+            parsed = clean_response(arguments)
 
             if parsed:
                 results.append(parsed)
             else:
-                print(f"[Warning] Empty or invalid JSON for row {index + 1}")
+                print(f"[Warning] Invalid JSON for row {idx + 1}")
 
         except Exception as e:
-            print(f"[Error] Row {index + 1} - {str(e)}")
+            print(f"[Error] Row {idx + 1}: {str(e)}")
             continue
 
+    # Save output
     output_path = os.path.join(OUTPUT_DIR, "structured_output.json")
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=4)
