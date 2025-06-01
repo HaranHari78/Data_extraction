@@ -48,10 +48,10 @@ def extract_data_from_csv(csv_path: str):
     results = []
     flat_rows = []
 
-    for idx, row in df.iterrows():
+    for row_num in range(len(df)):
+        row = df.iloc[row_num]
         title = row.get("title", "")
         text = row.get("text", "")
-        row_num = int(idx) + 1
 
         print(f"[Processing] Row {row_num}: {title[:40]}...")
 
