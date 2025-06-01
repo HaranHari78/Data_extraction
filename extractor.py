@@ -1,25 +1,25 @@
-# extractor.py
+# extractor.py (old-style Azure OpenAI method)
+
 import json
 import pandas as pd
 import os
 from dotenv import load_dotenv
-from openai import AzureOpenAI
+import openai
+
 from prompts import function_calling_prompt
 from functions import schema
 
 load_dotenv()
 
-# Initialize Azure OpenAI client
-client = AzureOpenAI(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-)
-
+# Setup classic Azure config
+openai.api_type = "azure"
+openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
+openai.api_base = os.getenv("AZURE_OPENAI_ENDPOINT")
+openai.api_version = os.getenv("AZURE_OPENAI_API_VERSION")
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
+
 OUTPUT_DIR = "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-
 
 def clean_response(raw: str):
     """Try to parse JSON string"""
@@ -46,15 +46,14 @@ def extract_data_from_csv(csv_path: str):
         prompt = function_calling_prompt(title, text)
 
         try:
-            response = client.chat.completions.create(
-                model=MODEL,
+            response = openai.ChatCompletion.create(
+                engine=MODEL,
                 messages=[{"role": "user", "content": prompt}],
                 functions=[schema],
                 function_call={"name": "extract_clinical_data"},
             )
 
-            message = response.choices[0].message
-            arguments = message.function_call.arguments
+            arguments = response.choices[0]["message"]["function_call"]["arguments"]
             parsed = clean_response(arguments)
 
             if parsed:
