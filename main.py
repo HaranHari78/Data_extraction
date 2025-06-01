@@ -70,11 +70,13 @@ for index, row in df.iterrows():
 
     cleaned_structured_data_json = clean_json_response(structured_data_json)
     try:
-        structured_data = json.loads(cleaned_structured_data_json)
-    except json.JSONDecodeError:
-        print("[⚠️ JSON Error] Structured extraction failed")
-        structured_data = {}
-        continue
+    extracted_sentences = json.loads(cleaned_response)
+except json.JSONDecodeError as e:
+    print("[⚠️ JSON Error] Sentence extraction failed")
+    with open("output/_raw_error_rows.log", "a", encoding="utf-8") as f:
+        f.write(f"\nRow {index}: {title}\n{cleaned_response}\n")
+    continue
+
 
     structured_data["document_title"] = title
     structured_results.append(structured_data)
