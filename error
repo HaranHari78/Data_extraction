@@ -1,2 +1,7 @@
 [Processing] Row 1: bfad7df253_41044_ Assessment & Plan Note...
 [❌ Error] Row 1: Error communicating with OpenAI: HTTPSConnectionPool(host='omh-eus-2-test-01.openai.azure.com', port=443): Max retries exceeded with url: /openai/deployments/OMH-EUS2-GPT4O-1/chat/completions?api-version=2024-02-01 (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1028)')))
+
+import ssl
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+ssl._create_default_https_context = ssl._create_unverified_context
