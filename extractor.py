@@ -1,12 +1,8 @@
-# extractor.py (clean version without logging)
+# extractor.py (clean version using utils structure)
 
 import os
 import json
 import pandas as pd
-import configparser
-import httpx
-
-from openai import AzureOpenAI
 from openai.types.chat import (
     ChatCompletionUserMessageParam,
     ChatCompletionFunctionCallOptionParam
@@ -14,24 +10,10 @@ from openai.types.chat import (
 
 from prompts import function_calling_prompt
 from functions import schema
+from utils import get_openai_client, get_model
 
-# Load config.ini
-
-def load_config():
-    parser = configparser.ConfigParser()
-    parser.read("config.ini")
-    return parser
-
-cfg = load_config()
-
-client = AzureOpenAI(
-    api_key=cfg["azure_openai"]["api_key"],
-    api_version=cfg["azure_openai"]["api_version"],
-    azure_endpoint=cfg["azure_openai"]["endpoint"],
-    http_client=httpx.Client(verify=False)
-)
-
-MODEL = cfg["gpt_models"]["model_gpt4o"]
+client = get_openai_client()
+MODEL = get_model()
 OUTPUT_DIR = "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -79,9 +61,11 @@ def extract_data_from_csv(csv_path: str):
 
             if parsed:
                 results.append(parsed)
-                flat_rows.append({"document_title": parsed.get("document_title", ""),
-                                  "aml_diagnosis_date": parsed.get("aml_diagnosis_date", {}).get("value", ""),
-                                  "ecog_score": parsed.get("performance_status", {}).get("ecog_score", {}).get("value", "")})
+                flat_rows.append({
+                    "document_title": parsed.get("document_title", ""),
+                    "aml_diagnosis_date": parsed.get("aml_diagnosis_date", {}).get("value", ""),
+                    "ecog_score": parsed.get("performance_status", {}).get("ecog_score", {}).get("value", "")
+                })
             else:
                 print(f"[Warning] Invalid JSON for row {row_num}")
 
