@@ -1,25 +1,28 @@
-# extractor.py (Modern SDK with AzureOpenAI)
-
 import os
 import json
 import pandas as pd
 from dotenv import load_dotenv
 from openai import AzureOpenAI
+import httpx  # ✅ import httpx for SSL bypass
+
 from prompts import function_calling_prompt
 from functions import schema
 
 load_dotenv()
 
+# ✅ Disable SSL certificate verification (for testing only)
+custom_http_client = httpx.Client(verify=False)
+
 client = AzureOpenAI(
     api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    http_client=custom_http_client  # ✅ inject httpx client
 )
 
 MODEL = os.getenv("AZURE_OPENAI_MODEL")
 OUTPUT_DIR = "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-
 
 def clean_response(raw: str):
     if not raw:
@@ -28,7 +31,6 @@ def clean_response(raw: str):
         return json.loads(raw)
     except json.JSONDecodeError:
         return None
-
 
 def extract_data_from_csv(csv_path: str):
     df = pd.read_csv(csv_path)
