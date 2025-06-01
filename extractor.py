@@ -1,32 +1,37 @@
-# extractor.py (using config.ini)
+# extractor.py (using config.ini with full typing and no warnings)
 
 import os
 import json
 import pandas as pd
 import configparser
 from openai import AzureOpenAI
+from openai.types.chat import ChatCompletionUserMessageParam
 import httpx
+import logging
 
 from prompts import function_calling_prompt
 from functions import schema
 
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 # Load config.ini
 
 def load_config():
-    config = configparser.ConfigParser()
-    config.read("config.ini")
-    return config
+    parser = configparser.ConfigParser()
+    parser.read("config.ini")
+    return parser
 
-config = load_config()
+cfg = load_config()
 
 client = AzureOpenAI(
-    api_key=config["azure_openai"]["api_key"],
-    api_version=config["azure_openai"]["api_version"],
-    azure_endpoint=config["azure_openai"]["endpoint"],
-    http_client=httpx.Client(verify=False)  # Optional SSL bypass
+    api_key=cfg["azure_openai"]["api_key"],
+    api_version=cfg["azure_openai"]["api_version"],
+    azure_endpoint=cfg["azure_openai"]["endpoint"],
+    http_client=httpx.Client(verify=False)
 )
 
-MODEL = config["gpt_models"]["model_gpt4o"]
+MODEL = cfg["gpt_models"]["model_gpt4o"]
 OUTPUT_DIR = "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -41,23 +46,28 @@ def clean_response(raw: str):
 def extract_data_from_csv(csv_path: str):
     df = pd.read_csv(csv_path)
     results = []
+    flat_rows = []
 
     for idx, row in df.iterrows():
         title = row.get("title", "")
         text = row.get("text", "")
         row_num = int(idx) + 1
 
-        print(f"\n[Processing] Row {row_num}: {title[:40]}...")
+        logging.info(f"[Processing] Row {row_num}: {title[:40]}...")
 
         if not text:
             continue
 
         prompt = function_calling_prompt(title, text)
 
+        messages: list[ChatCompletionUserMessageParam] = [
+            {"role": "user", "content": prompt}
+        ]
+
         try:
             response = client.chat.completions.create(
                 model=MODEL,
-                messages=[{"role": "user", "content": prompt}],
+                messages=messages,
                 functions=[schema],
                 function_call={"name": "extract_clinical_data"},
             )
@@ -67,15 +77,21 @@ def extract_data_from_csv(csv_path: str):
 
             if parsed:
                 results.append(parsed)
+                flat_rows.append({"document_title": parsed.get("document_title", ""),
+                                  "aml_diagnosis_date": parsed.get("aml_diagnosis_date", {}).get("value", ""),
+                                  "ecog_score": parsed.get("performance_status", {}).get("ecog_score", {}).get("value", "")})
             else:
-                print(f"[⚠️ Warning] Invalid JSON for row {row_num}")
+                logging.warning(f"[Warning] Invalid JSON for row {row_num}")
 
         except Exception as e:
-            print(f"[❌ Error] Row {row_num}: {str(e)}")
+            logging.error(f"[Error] Row {row_num}: {str(e)}")
             continue
 
-    output_path = os.path.join(OUTPUT_DIR, "structured_output.json")
-    with open(output_path, "w", encoding="utf-8") as f:
+    output_json_path = os.path.join(OUTPUT_DIR, "structured_output.json")
+    with open(output_json_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=4)
 
-    print(f"\n✅ Extracted data saved to: {output_path}")
+    output_csv_path = os.path.join(OUTPUT_DIR, "structured_output.csv")
+    pd.DataFrame(flat_rows).to_csv(output_csv_path, index=False)
+
+    logging.info(f"✅ Extracted data saved to: {output_json_path} and {output_csv_path}")
