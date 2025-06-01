@@ -39,6 +39,7 @@ for index, row in df.iterrows():
     # Prompt 1: Extract relevant sentences
     prompt1 = sentence_extraction_prompt(title, text)
     extracted_sentences_json = call_openai_api(prompt1, model)
+    print("[🔍 Raw API Response Snippet]", extracted_sentences_json[:300])
 
     if not extracted_sentences_json:
         continue
