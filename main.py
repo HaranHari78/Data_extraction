@@ -20,8 +20,11 @@ def clean_json_response(response: str):
     """Clean JSON response from OpenAI API"""
     if not response or not isinstance(response, str):
         return ""
-    cleaned = re.sub(r'```json\n?|\n?```', '', response).strip()
+    # Strip code block markers and fix trailing issues
+    cleaned = re.sub(r'```(?:json)?\\n?|\\n?```', '', response).strip()
+    cleaned = cleaned.replace('\n', ' ')  # collapse newlines just in case
     return cleaned
+
 
 # Read input data
 df = pd.read_csv(input_file, encoding='utf-8')
