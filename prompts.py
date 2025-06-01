@@ -25,16 +25,13 @@ def sentence_extraction_prompt(title, text):
     }}
     """
 
-def field_extraction_prompt(text):
+def field_extraction_prompt(text: str):
     return f"""
-    You are analyzing a clinical note for an AML cancer patient.
+You are an expert clinical data annotator. You will extract structured information for an AML cancer patient based on the following clinical note.
 
-    Extract the following fields according to the provided function schema:
-    - AML Diagnosis Date
-    - Precedent Disease with name, date, and evidence
-    - Performance Status (ECOG and KPS scores with dates and evidence)
-    - Mutational Status (NPM1, RUNX1, TP53, FLT3, ASXL1 — each with status, date, and evidence)
+Your goal is to **populate ALL fields** based on the schema. If a value is not present, use an empty string "" (not null, not omitted).
 
-    Clinical Note:
-    """{text}"""
-    """
+Clinical Note:
+\"\"\"{text}\"\"\"
+"""
+
