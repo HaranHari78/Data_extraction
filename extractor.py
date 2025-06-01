@@ -1,19 +1,19 @@
-# extractor.py (using config.ini with full typing and no warnings)
+# extractor.py (clean version without logging)
 
 import os
 import json
 import pandas as pd
 import configparser
-from openai import AzureOpenAI
-from openai.types.chat import ChatCompletionUserMessageParam
 import httpx
-import logging
+
+from openai import AzureOpenAI
+from openai.types.chat import (
+    ChatCompletionUserMessageParam,
+    ChatCompletionFunctionCallOptionParam
+)
 
 from prompts import function_calling_prompt
 from functions import schema
-
-# Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load config.ini
 
@@ -53,7 +53,7 @@ def extract_data_from_csv(csv_path: str):
         text = row.get("text", "")
         row_num = int(idx) + 1
 
-        logging.info(f"[Processing] Row {row_num}: {title[:40]}...")
+        print(f"[Processing] Row {row_num}: {title[:40]}...")
 
         if not text:
             continue
@@ -64,12 +64,14 @@ def extract_data_from_csv(csv_path: str):
             {"role": "user", "content": prompt}
         ]
 
+        function_call: ChatCompletionFunctionCallOptionParam = {"name": "extract_clinical_data"}
+
         try:
             response = client.chat.completions.create(
                 model=MODEL,
                 messages=messages,
                 functions=[schema],
-                function_call={"name": "extract_clinical_data"},
+                function_call=function_call,
             )
 
             arguments = response.choices[0].message.function_call.arguments
@@ -81,10 +83,10 @@ def extract_data_from_csv(csv_path: str):
                                   "aml_diagnosis_date": parsed.get("aml_diagnosis_date", {}).get("value", ""),
                                   "ecog_score": parsed.get("performance_status", {}).get("ecog_score", {}).get("value", "")})
             else:
-                logging.warning(f"[Warning] Invalid JSON for row {row_num}")
+                print(f"[Warning] Invalid JSON for row {row_num}")
 
         except Exception as e:
-            logging.error(f"[Error] Row {row_num}: {str(e)}")
+            print(f"[Error] Row {row_num}: {str(e)}")
             continue
 
     output_json_path = os.path.join(OUTPUT_DIR, "structured_output.json")
@@ -94,4 +96,4 @@ def extract_data_from_csv(csv_path: str):
     output_csv_path = os.path.join(OUTPUT_DIR, "structured_output.csv")
     pd.DataFrame(flat_rows).to_csv(output_csv_path, index=False)
 
-    logging.info(f"✅ Extracted data saved to: {output_json_path} and {output_csv_path}")
+    print(f"\n✅ Extracted data saved to: {output_json_path} and {output_csv_path}")
