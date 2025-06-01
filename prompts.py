@@ -1,3 +1,5 @@
+# prompts.py
+
 def sentence_extraction_prompt(title, text):
     return f"""
     You are analyzing a clinical document for an AML cancer patient.
@@ -15,7 +17,9 @@ def sentence_extraction_prompt(title, text):
     Document Text:
     {text}
 
-    Return a JSON like:
+    Respond with ONLY valid JSON in the following format:
+    Do not include explanations or markdown. Return only JSON.
+
     {{
         "document_title": "{title}",
         "aml_diagnosis_sentences": [],
@@ -27,8 +31,9 @@ def sentence_extraction_prompt(title, text):
 
 def field_extraction_prompt(text):
     return f"""
-    Extract the following fields from this clinical note:
+    Extract the following fields from this clinical note.
 
+    Clinical Note:
     """{text}"""
 
     Fields to extract:
@@ -42,7 +47,7 @@ def field_extraction_prompt(text):
     4. Mutational Status (genes: NPM1, RUNX1, TP53, FLT3, ASXL1):
         - each with status, date, and evidence
 
-    Return only valid JSON in this format:
+    Return ONLY valid JSON like this:
     {{
         "document_title": "",
         "aml_diagnosis_date": {{"value": "", "evidence": ""}},
