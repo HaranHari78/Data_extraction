@@ -1,0 +1,26 @@
+# utils.py
+
+import configparser
+from openai import AzureOpenAI
+
+def load_config():
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    return config
+
+def call_openai_api(prompt: str, model: str):
+    config = load_config()
+    try:
+        client = AzureOpenAI(
+            api_key=config['azure_openai']['api_key'],
+            api_version=config['azure_openai']['api_version'],
+            azure_endpoint=config['azure_openai']['endpoint'],
+        )
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"API error: {e}")
+        return ""
