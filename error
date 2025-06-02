@@ -1,7 +1,7 @@
-C:\Users\HariharaM12\PycharmProjects\Data_extraction\.venv\Scripts\python.exe C:\Users\HariharaM12\PycharmProjects\Data_extraction\main.py 
-API error: Connection error.
-Failed to parse JSON for row 0
-API error: Connection error.
-Failed to parse JSON for row 1
-API error: Connection error.
-Failed to parse JSON for row 2
+[azure_openai]
+api_key = 8804263e0e884a73b493a58f22505cc6
+endpoint = https://omh-eus-2-test-01.openai.azure.com/
+api_version = 2024-02-01
+
+[gpt_models]
+model_gpt4o = OMH-EUS2-GPT4O-1
