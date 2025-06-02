@@ -12,8 +12,8 @@ from utils import load_config, call_openai_api
 openai_config = load_config()
 model = openai_config['gpt_models']['model_gpt4o']
 input_file = r"C:\Users\HariharaM12\Downloads\medicaldata.csv"
-sentence_output_file = 'output/extracted_sentences.json'
-structured_output_file = 'output/structured_data.json'
+sentence_output_file = 'extracted_sentences.json'
+structured_output_file = 'structured_data.json'
 sentence_results = []
 structured_results = []
 
@@ -49,8 +49,6 @@ for index, row in df.iterrows():
         extracted_sentences = json.loads(cleaned_response)
     except json.JSONDecodeError:
         print("[⚠️ JSON Error] Sentence extraction failed")
-        with open("output/_raw_error_rows.log", "a", encoding="utf-8") as f:
-            f.write(f"\nRow {index}: {title}\n{cleaned_response}\n")
         continue
 
     sentence_results.append(extracted_sentences)
@@ -75,21 +73,17 @@ for index, row in df.iterrows():
         structured_data = json.loads(cleaned_structured_data_json)
     except json.JSONDecodeError:
         print("[⚠️ JSON Error] Structured data parsing failed")
-        with open("output/_raw_error_rows.log", "a", encoding="utf-8") as f:
-            f.write(f"\n[STRUCTURED FAIL] Row {index}: {title}\n{cleaned_structured_data_json}\n")
         continue
 
     structured_data["document_title"] = title
     structured_results.append(structured_data)
 
 # Save outputs
-os.makedirs("output", exist_ok=True)
 with open(sentence_output_file, 'w', encoding='utf-8') as f:
     json.dump(sentence_results, f, indent=4)
 
 with open(structured_output_file, 'w', encoding='utf-8') as f:
     json.dump(structured_results, f, indent=4)
-
 
 print("\n✅ Data saved to output files")
 print(f"\n📝 Sentence results saved to: {sentence_output_file} ({len(sentence_results)} records)")
