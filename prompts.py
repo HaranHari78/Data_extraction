@@ -27,11 +27,62 @@ def sentence_extraction_prompt(title, text):
 
 def field_extraction_prompt(text: str):
     return f"""
-You are an expert clinical data annotator. You will extract structured information for an AML cancer patient based on the following clinical note.
-
-Your goal is to **populate ALL fields** based on the schema. If a value is not present, use an empty string "" (not null, not omitted).
+Extract the following information from the clinical note provided below. Return output in JSON format only.
 
 Clinical Note:
 \"\"\"{text}\"\"\"
+
+Extract and return this information:
+1. AML Diagnosis Date — mm/dd/yyyy format, and sentence
+2. Precedent Disease — a list of objects:
+  - disease name
+  - date of mention
+  - sentence
+3. Performance Status:
+  - ECOG score
+  - ECOG date
+  - ECOG sentence
+  - KPS score
+  - KPS date
+  - KPS sentence
+4. Mutational Status — for each of the genes NPM1, RUNX1, TP53, FLT3, ASXL1:
+  - status (e.g., mutated, wild type)
+  - date of finding (if any)
+  - sentence
+
+Return JSON in this structure:
+{{
+  "document_title": "",
+  "aml_diagnosis_date": {{
+    "value": "",
+    "evidence": ""
+  }},
+  "precedent_disease": [
+    {{
+      "name": "",
+      "date": "",
+      "evidence": ""
+    }}
+  ],
+  "performance_status": {{
+    "ecog_score": {{
+      "value": "",
+      "date": "",
+      "evidence": ""
+    }},
+    "kps_score": {{
+      "value": "",
+      "date": "",
+      "evidence": ""
+    }}
+  }},
+  "mutational_status": {{
+    "NPM1": {{"status": "", "date": "", "evidence": ""}},
+    "RUNX1": {{"status": "", "date": "", "evidence": ""}},
+    "TP53": {{"status": "", "date": "", "evidence": ""}},
+    "FLT3": {{"status": "", "date": "", "evidence": ""}},
+    "ASXL1": {{"status": "", "date": "", "evidence": ""}}
+  }}
+}}
 """
 
