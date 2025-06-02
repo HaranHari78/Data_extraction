@@ -1,0 +1,39 @@
+# prompts.py
+
+def field_extraction_prompt(text: str) -> str:
+    return f"""
+You are a medical AI assistant. Extract structured cancer-related data from the clinical note below. Follow the output format strictly in JSON.
+
+Only extract what is present in the note. Do not fabricate or guess. Use null where data is missing.
+
+---
+Clinical Note:
+{text}
+---
+
+Return output in this JSON format:
+
+{{
+  "aml_diagnosis_date": "YYYY-MM-DD or null",
+  "cancer_type": "AML or other type or null",
+  "mutational_status": {{
+    "FLT3": "positive/negative/unknown",
+    "NPM1": "positive/negative/unknown",
+    "IDH1": "positive/negative/unknown",
+    "IDH2": "positive/negative/unknown",
+    "TP53": "positive/negative/unknown"
+  }},
+  "performance_status": {{
+    "score": "ECOG/Karnofsky with value",
+    "date": "YYYY-MM-DD or null"
+  }},
+  "treatment_plan": "summary or null",
+  "treatment_start_date": "YYYY-MM-DD or null",
+  "cytogenetics_summary": "text or null",
+  "prior_malignancy": "summary or null",
+  "comorbidities": ["list of conditions or empty"],
+  "transplant_status": "Yes/No/Planned/Unknown",
+  "blast_percentage": "value with context or null",
+  "disease_status": "e.g., newly diagnosed, remission, etc."
+}}
+"""
