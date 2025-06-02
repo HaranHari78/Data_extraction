@@ -11,7 +11,7 @@ from utils import load_config, call_openai_api
 # Configuration
 openai_config = load_config()
 model = openai_config['gpt_models']['model_gpt4o']
-input_file = 'medicalnotes.csv'
+input_file = r"C:\Users\HariharaM12\Downloads\medicaldata.csv"
 sentence_output_file = 'output/extracted_sentences.json'
 structured_output_file = 'output/structured_data.json'
 sentence_results = []
