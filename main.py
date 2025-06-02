@@ -1,9 +1,5 @@
-# main.py
-
-import csv
 import json
 import re
-import os
 import pandas as pd
 from prompts import sentence_extraction_prompt, field_extraction_prompt
 from utils import load_config, call_openai_api
