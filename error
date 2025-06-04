@@ -24,6 +24,12 @@ trusted-host = files.pythonhosted.org
 
 C:\Users\hariVetri\AppData\Roaming\pip\pip.ini
 
+
+
+
+
+
+
 PS C:\Users\HariharaM12\PycharmProjects\PythonProject> pip install pandas
 Configuration file could not be loaded.
 While reading from 'C:\\ProgramData\\pip\\pip.ini' [line  4]: option 'trusted-host' in section 'global' already exists
@@ -40,4 +46,11 @@ Defaulting to user installation because normal site-packages is not writeable
 ERROR: Could not install packages due to an OSError: Could not find a suitable TLS CA certificate bundle, invalid path: C:\certs\cacert.pem
 
 WARNING: There was an error checking the latest version of pip.
+
+
+[global]
+trusted-host = pypi.org
+trusted-host = files.pythonhosted.org
+cert =
+disable-pip-version-check = true
 
