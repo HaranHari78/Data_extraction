@@ -84,3 +84,4 @@ with open(structured_output_file, 'w', encoding='utf-8') as f:
 print("\n✅ Data saved to output files")
 print(f"\n📝 Sentence results saved to: {sentence_output_file} ({len(sentence_results)} records)")
 print(f"📝 Structured results saved to: {structured_output_file} ({len(structured_results)} records)")
+
