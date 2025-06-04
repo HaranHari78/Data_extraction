@@ -25,6 +25,7 @@ def sentence_extraction_prompt(title, text):
     }}
     """
 
+
 def field_extraction_prompt(text: str):
     return f"""
 Extract the following information from the clinical note provided below. Return output in JSON format only.
@@ -85,4 +86,3 @@ Return JSON in this structure:
   }}
 }}
 """
-
