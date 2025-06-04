@@ -21,3 +21,7 @@ trusted-host = pypi.org
 trusted-host = files.pythonhosted.org
 
 C:\Users\hariVetri\AppData\Roaming\pip\pip.ini
+
+PS C:\Users\HariharaM12\PycharmProjects\PythonProject> pip install pandas
+Configuration file could not be loaded.
+While reading from 'C:\\ProgramData\\pip\\pip.ini' [line  4]: option 'trusted-host' in section 'global' already exists
