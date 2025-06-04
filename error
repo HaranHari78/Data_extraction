@@ -5,3 +5,10 @@ api_version = 2024-02-01
 
 [gpt_models]
 model_gpt4o = OMH-EUS2-GPT4O-1
+
+WARNING: Retrying (Retry(total=4, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x000002546E0EB770>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')': /simple/pandas/
+WARNING: Retrying (Retry(total=3, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x000002546E264690>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')': /simple/pandas/
+WARNING: Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x000002546E264910>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')': /simple/pandas/
+WARNING: Retrying (Retry(total=1, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x000002546E264B90>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')': /simple/pandas/
+WARNING: Retrying (Retry(total=0, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NewConnectionError('<pip._vendor.urllib3.connection.HTTPSConnection object at 0x000002546E264E10>: Failed to establish a new connection: [Errno 11001] getaddrinfo failed')': /simple/pandas/
+ERROR: Could not find a version that satisfies the requirement pandas (from versions: none)
