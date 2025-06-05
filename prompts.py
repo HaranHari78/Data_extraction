@@ -28,61 +28,32 @@ def sentence_extraction_prompt(title, text):
 
 def field_extraction_prompt(text: str):
     return f"""
-Extract the following information from the clinical note provided below. Return output in JSON format only.
+You are a medical language model trained to extract structured clinical data from patient notes.
 
-Clinical Note:
-\"\"\"{text}\"\"\"
+From the clinical note below, extract **mutation status** information for the following genes:
+- NPM1, TP53, FLT3, ASXL1
 
-Extract and return this information:
-1. AML Diagnosis Date — mm/dd/yyyy format, and sentence
-2. Precedent Disease — a list of objects:
-  - disease name
-  - date of mention
-  - sentence
-3. Performance Status:
-  - ECOG score
-  - ECOG date
-  - ECOG sentence
-  - KPS score
-  - KPS date
-  - KPS sentence
-4. Mutational Status — for each of the genes NPM1, RUNX1, TP53, FLT3, ASXL1:
-  - status (e.g., mutated, wild type)
-  - date of finding (if any)
-  - sentence
+Look specifically for phrases indicating:
+- Whether the gene is **mutated**, **wild type**, **not mutated**, **positive**, or **negative**
+- Also capture **date of test** if mentioned
+- Always include the **exact sentence** as evidence
 
-Return JSON in this structure:
+📌 Important:
+- If a gene is only mentioned but **no status** is given (like mutated or wild type), leave "status" as empty string but still return the sentence.
+- Be strict: only classify a gene as mutated/wild type if it’s clearly stated.
+
+Return output in the following JSON format:
+
 {{
-  "document_title": "",
-  "aml_diagnosis_date": {{
-    "value": "",
-    "evidence": ""
-  }},
-  "precedent_disease": [
-    {{
-      "name": "",
-      "date": "",
-      "evidence": ""
-    }}
-  ],
-  "performance_status": {{
-    "ecog_score": {{
-      "value": "",
-      "date": "",
-      "evidence": ""
-    }},
-    "kps_score": {{
-      "value": "",
-      "date": "",
-      "evidence": ""
-    }}
-  }},
   "mutational_status": {{
     "NPM1": {{"status": "", "date": "", "evidence": ""}},
-    "RUNX1": {{"status": "", "date": "", "evidence": ""}},
     "TP53": {{"status": "", "date": "", "evidence": ""}},
     "FLT3": {{"status": "", "date": "", "evidence": ""}},
     "ASXL1": {{"status": "", "date": "", "evidence": ""}}
   }}
 }}
+
+Clinical Note:
+\"\"\"{text}\"\"\"
 """
+
